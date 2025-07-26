@@ -73,6 +73,9 @@ Sprite_Name :: enum {
 	player_death,
 	player_run,
 	player_idle,
+	alien,
+	projectile,
+	player_ship,
 	// to add new sprites, just put the .png in the res/images folder
 	// and add the name to the enum here
 	//

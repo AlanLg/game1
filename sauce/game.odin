@@ -71,9 +71,7 @@ action_map: map[Input_Action]input.Key_Code = {
 	.right = .D,
 	.up = .W,
 	.down = .S,
-	.click = .LEFT_MOUSE,
-	.use = .RIGHT_MOUSE,
-	.interact = .E,
+	.shoot = .LEFT_MOUSE,
 }
 
 Input_Action :: enum u8 {
@@ -81,9 +79,7 @@ Input_Action :: enum u8 {
 	right,
 	up,
 	down,
-	click,
-	use,
-	interact,
+	shoot,
 }
 
 //
@@ -100,6 +96,13 @@ Entity :: struct {
 	// big sloppy entity state dump.
 	// add whatever you need in here.
 	pos: Vec2,
+
+	vel: Vec2,
+	acc: Vec2,
+	friction: f32,
+	do_physics: bool,
+	time_alive: f32,
+
 	last_known_x_dir: f32,
 	flip_x: bool,
 	draw_offset: Vec2,
@@ -121,7 +124,8 @@ Entity :: struct {
 Entity_Kind :: enum {
 	nil,
 	player,
-	thing1,
+	alien,
+	projectile,
 }
 
 entity_setup :: proc(e: ^Entity, kind: Entity_Kind) {
@@ -132,7 +136,8 @@ entity_setup :: proc(e: ^Entity, kind: Entity_Kind) {
 	switch kind {
 		case .nil:
 		case .player: setup_player(e)
-		case .thing1: setup_thing1(e)
+		case .alien: setup_alien(e)
+		case .projectile: setup_projectile(e)
 	}
 }
 
@@ -272,41 +277,42 @@ get_player :: proc() -> ^Entity {
 }
 
 setup_player :: proc(e: ^Entity) {
-	e.kind = .player
-
-	// this offset is to take it from the bottom center of the aseprite document
-	// and center it at the feet
-	e.draw_offset = Vec2{0.5, 5}
-	e.draw_pivot = .bottom_center
+	e.kind = Entity_Kind.player
+	e.sprite = Sprite_Name.player_ship
+	e.pos = Vec2{0, -100}
+	e.do_physics = false
 
 	e.update_proc = proc(e: ^Entity) {
 
 		input_dir := get_input_vector()
 		e.pos += input_dir * 100.0 * ctx.delta_t
 
-		if input_dir.x != 0 {
-			e.last_known_x_dir = input_dir.x
+		if is_action_pressed(.shoot) {
+			consume_action_pressed(.shoot)
+
+			projectile := entity_create(.projectile)
+			projectile.pos = e.pos
+			projectile.pos.y += 20
+			projectile.vel = 50 * Vec2{0, 1}
 		}
-
-		e.flip_x = e.last_known_x_dir < 0
-
-		if input_dir == {} {
-			entity_set_animation(e, .player_idle, 0.3)
-		} else {
-			entity_set_animation(e, .player_run, 0.1)
-		}
-
-		e.scratch.col_override = Vec4{0,0,1,0.2}
-	}
-
-	e.draw_proc = proc(e: Entity) {
-		draw.draw_sprite(e.pos, .shadow_medium, col={1,1,1,0.2})
-		draw_entity_default(e)
 	}
 }
 
-setup_thing1 :: proc(using e: ^Entity) {
-	kind = .thing1
+setup_projectile :: proc(using e: ^Entity) {
+	kind = .projectile
+	sprite = .projectile
+	do_physics = true
+
+	e.update_proc = proc(e: ^Entity) {
+		if e.time_alive > 5.0 {
+			entity_destroy(e)
+		}
+	}
+}
+setup_alien :: proc(using e: ^Entity) {
+	kind = .alien
+	sprite = .alien
+	pos = {-190, 90}
 }
 
 entity_set_animation :: proc(e: ^Entity, sprite: Sprite_Name, frame_duration: f32, looping:=true) {
