@@ -33,17 +33,17 @@ raw_button helper for ui button stuff
 
 --- v0.8
 Massive overhaul of template to be more friendly for future updates.
+Added bald_helpers file for a single upgrade point for all helper functions
 Moved most of the core stuff into the /bald package collection
 Moved core_render into the /draw package
 Moved core_input into the /input package
-Added bald_helpers file for a single upgrade point for all helper functions
+Moved /build into the bald collection
+Moved core shader code into /draw, the shader.glsl is now just a pixel shader
+Added hash_storage, steamworks, & flat-array packages
+Cleaned up vector types, now just using standard Vec2, Vec3, Vec4
 
 --- TODO :next
 
-
-put build into /bald ???
-
-make shader more abstract so it's easier to update
 
 
 maybe rethink how the get world space function works?

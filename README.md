@@ -1,88 +1,129 @@
-# G'DAY
+If you'd like to learn how to use this to make games, [go here](https://learn.randy.gg/?src=template-starter)
 
-This is a template I made for my [mentorship program](https://learn.randy.gg/?src=template-starter) to make getting started with no-engine game dev a lot easier.
+If you want some free value like this blueprint delivered to your inbox every now and then, checkout [my mailing list](https://path.randy.gg)
 
-I figured I'd make this free and open, as a nice sample of what the program has to offer.
+---
 
-My whole goal is to create resources and content that makes no-engine game dev more fun and less of a slog for people. That way we can all focus on writing gameplay code and doing game design, instead of getting stuck in tech no-mans-land and having to write a whole bunch of boring boilerplate just to get a triangle showing up on screen.
+This is practically my entire toolset that I use for no-engine game development.
 
-**GAMEPLAY O'CLOCK BAYBEEEE**
-
-This is practically my entire core layer I use for game development. I used the concepts in here to make these games:
+I used the concepts in here to make these games:
 - https://store.steampowered.com/app/2571560/ARCANA/
 - https://store.steampowered.com/app/3309460/Demon_Knives/
 - https://store.steampowered.com/app/3433610/Terrafactor/
 
-I've been tweaking and iterating on these ideas for the last 5 years of learning how to program a game without an engine.
+I've been iterating on these ideas for the last 5 years of learning how to program a game without an engine.
 
-These days, I've landed on Odin as the language, and Sokol as the core platform & rendering abstractions. With a bunch of concepts and helpers added on top to make life easier.
+Things are in various stages of completion, lots of TODOs thrown around, dumb performance bottlenecks, etc. But as it stands, it's about as production ready as I've been able to pull off so far.
 
-## About
-All the files marked with `core_` are designed to be updated, I'll push updates as needed.
+I'll be updating this as I continue making games and learning new things.
 
-See the FAQ segment at the bottom for more info.
+# Features
+- Very fast pixel art asset creation & iteration pipeline with Aseprite via `asset_workbench/aseprite_asset_export.lua`
+- Shaders with a rendering system that can be completely overhauled to suit whatever VFX you need
+- A single-function entity gameplay programming workflow that scales well
+- Fully featured sound design via FMOD, with wrappers for making it feel extremely easy to program the actual sound playback hooks
+- Very tight Game_State and Entity structure that can be easily serialized
 
-### What this is great for:
-- arcade games & game jams
-- a small to medium size singleplayer Steam game
+## Coming One Day™️
+No idea on an ETA for these guys. It'll happen whenever it's actually needed.
+- Controller support
+- Custom backends for console support (switch, xbox, ps5)
+- 3D rendering package & pipeline
 
-## Building
+# The Structure
 
-In general, development is way easier on windows since there's more tooling and it's what [~96%](https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam) of Steam customers use, so it leads to less bugs for the majority of people because you're daily-driving the same OS and can iron out all the platform-specific kinks.
+Overview of Packages in `/sauce/bald`
+- `/draw` cross platform high performance 2D sprite rendering via Sokol
+- `/sound` easy sound playback & design system via FMOD
+- `/input` simple input abstraction
+- `/utils/shape` simple shape abstraction for collisions
+
+^ In general, these packages are made to be easily upgradable and sharable across projects.
+
+## `main.odin`  
+This is the entrypoint and the structure of the main loop.
+
+By default, I use a variable timestep. It works nicely in most situations for as little complexity as possible. But this can be altered to fit whatever the constraints of the game are. Maybe it's multiplayer. Maybe it needs a fixed timestep. Etc.
+
+## `game.odin`
+This is where most of the magic happens. The intersection of all tech. A place to "just make game".
+
+This is the file I spend 90% of my time in, adding in new content to whatever the game is. It gets pretty big pretty quick. It's a very cozy place for writing gameplay slop.
+
+## `entity.odin`
+The backbone of the entity megastruct. As talked about [in here](https://randyprime.beehiiv.com/p/entity-structure-made-simple).
+
+## `bald_helpers.odin`
+This is the intersection of the `/bald` packages and all the game-specific stuff.
+
+
+# Building
+
+In general, development is way easier on windows since there's more tooling and it's what [~96%](https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam) of Steam customers use, so it leads to less bugs for the majority of people because you're daily-driving the same OS and can iron out all the platform-specific kinks. If you're planning on doing game-dev full time though and targeting Steam, I'd highly recommend getting some kind of windows environment setup.
 
 I get that some people prefer to be linux or mac chads though. It's relatively simple to get working natively since Sokol is great, so I'm beginning to add in support for both.
 
-If you're planning on doing game-dev full time though and targeting Steam, I'd highly recommend getting some kind of windows environment setup. There's just no way around it right now unfortunately. Game dev is easier on windows despite the OS itself getting worse and worse each year and making me cry at HOW FUCKING DOGSHIT IT FEELS TO USE alsk;djfkl;asd fjl;ksadjfk sadfkjl;sdaflkj
-
-... sorry about that. Here's the build instructions.
-
-### Windows
+## Windows
 1. [install Odin](https://odin-lang.org/docs/install/)
 2. call `build.bat`
 3. check `build/windows_debug`
 4. see instructions below for running
 
-### Mac
+## Mac
 1. [install Odin](https://odin-lang.org/docs/install/)
-2. make the folders for `build/mac_debug` (currently a bug)
-3. call `build_mac.sh`
-4. check `build/mac_debug`
-5. see instructions below for running
+2. call `build_mac.sh`
+3. check `build/mac_debug`
+4. see instructions below for running
 
-### Linux
+## Linux
 todo
 
-### Web
+## Web
 coming soon™️
 
-## Running
+# Running
 Needs to run from the root directory since it's accessing /res.
 
 I'd recommend setting up the [RAD Debugger](https://github.com/EpicGamesExt/raddebugger) (windows-only) for a great running & debugging experience. I always launch my game directly from there so it's easier to catch bugs on the fly.
 
-## FAQ
-### How do I use this to make a game?
-I'm focusing my efforts on making course content for this in [my paid program](https://learn.randy.gg/?src=template-starter) with a bunch of examples of how to use it.
+# FAQ
+## How do I use this to make a game?
+I'm focusing my efforts on teaching people how to use this via [my paid program](https://learn.randy.gg/?src=template-starter).
 
 If you're on a budget, here's some free alternatives:
-- I do [live streams](https://www.youtube.com/@randyprime2) of development while using this template
-- My public [Discord community](https://discord.gg/JXhxeQW4ca) (you can ask as many questions in there as you'd like and get help from the community, I just can't guarentee the quality of the answers)
+- I do [live streams](https://www.youtube.com/@randyprime2) of development while using this
+- I make educational content for this on [my YT channel](https://www.youtube.com/@randyprime)
 
-### Why is this a template (not a library)?
+## Why is this a "blueprint" (not a library)?
 Game development is complicated.
 
 I think trying to abstract everything away behind a library is a mistake. It makes things look and feel "clean" but sacrifices the capability, limiting what you're able to do and forcing you to use hacky workarounds instead of just doing the simplest and most direct thing possible to solve the problem.
 
-I tried my best to seperate the core layer from the game so it's easy to upgrade later on, but there's what I believe to be an unavoidable tangling of some ideas in a lot of places.
+old way:
+1. use library
+2. hit a wall in using it
+3. work around it in a hacky way or cut the idea
 
-### Why Odin?
+new way:
+1. use this blueprint
+2. hit a wall in using it
+3. learn the fundamental thing it's doing, then build on top of it, adjusting the source
+4. (optional) open an issue so I can consider integrating it into the blueprint
+
+> The most common example is you'll have something you want to do with the rendering. So you go off an learn graphics programming using [this](https://learnopengl.com/), maybe rewriting your own version of `/draw`, or just adjusting it to do the thing you need. (Render textures, adjusting the Vertex data, multi-stage draw passes and post-processing, etc)
+
+I tried my best to seperate the core layer `/bald` from the game specific stuff so it's easy to upgrade later on, but there's what I believe to be an unavoidable tangling of some ideas in a lot of places.
+
+I'll continue trying to simplify this and make it as readable and usable as possible, without sacrificing the full production-ready power of it.
+
+## Why Odin?
 Compared to C, it's a lot more fun to work in. Less overall typing, more safety by default, and great quality of life. Happy programming = more gameplay.
 
 Compared to Jai, it has more users and is public (Jai is still in a closed beta). So that means more stability and a better ecosystem around packages, tooling etc, (because more people use it).
 
-### Why Sokol?
-Compared to Raylib:
+## Why Sokol?
+It feels like a nice sweet spot high and low level.
 
-I initially tried using Raylib for this template, it was going well... Right up until the point where I needed to do a specific shader effect on a single sprite. At that point, I would have had to do something hacky to single out the vertices in the shader, or just use the lower level RLGL to basically just write a custom renderer so I could modify the verts and have more power with the shaders.
+It's not as high level as something like Raylib, so there's more flexibility with what you can do. But to use it, you need to learn graphics programming. And that kinda sucks for beginners. That's why I've built this blueprint. It's kinda like an all-in-one production ready suite, where you can opt-in to the finer details without changing your end gameplay programming workflow.
 
-... at that point, Sokol just becomes a way better option because it lets you do native targets like DirectX11 and Metal with a simple abstraction.
+But it's not as low level as something like just manually writing win32 code & raw directx11 to get a triangle drawing on the screen.

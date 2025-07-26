@@ -44,6 +44,14 @@ import slog "bald:sokol/log"
 
 import win32 "core:sys/windows" // wait, how is this building on mac?
 
+Core_Context :: struct {
+	gs: ^Game_State,
+	delta_t: f32,
+
+	// #todo, put input in here and make helpers that wrap over
+}
+ctx: Core_Context
+
 //
 // MAIN
 

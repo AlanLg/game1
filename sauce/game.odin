@@ -256,6 +256,56 @@ game_draw :: proc() {
 	}
 }
 
+// note, this needs to be in the game layer because it varies from game to game.
+// Specifically, stuff like anim_index and whatnot aren't guarenteed to be named the same or actually even be on the base entity.
+// (in terrafactor, it's inside a sub state struct)
+draw_entity_default :: proc(e: Entity) {
+	e := e // need this bc we can't take a reference from a procedure parameter directly
+
+	if e.sprite == nil {
+		return
+	}
+
+	xform := utils.xform_rotate(e.rotation)
+
+	draw_sprite_entity(&e, e.pos, e.sprite, xform=xform, anim_index=e.anim_index, draw_offset=e.draw_offset, flip_x=e.flip_x, pivot=e.draw_pivot)
+}
+
+// helper for drawing a sprite that's based on an entity.
+// useful for systems-based draw overrides, like having the concept of a hit_flash across all entities
+draw_sprite_entity :: proc(
+	entity: ^Entity,
+
+	pos: Vec2,
+	sprite: Sprite_Name,
+	pivot:=utils.Pivot.center_center,
+	flip_x:=false,
+	draw_offset:=Vec2{},
+	xform:=Matrix4(1),
+	anim_index:=0,
+	col:=color.WHITE,
+	col_override:Vec4={},
+	z_layer:ZLayer={},
+	flags:Quad_Flags={},
+	params:Vec4={},
+	crop_top:f32=0.0,
+	crop_left:f32=0.0,
+	crop_bottom:f32=0.0,
+	crop_right:f32=0.0,
+	z_layer_queue:=-1,
+) {
+
+	col_override := col_override
+
+	col_override = entity.scratch.col_override
+	if entity.hit_flash.a != 0 {
+		col_override.xyz = entity.hit_flash.xyz
+		col_override.a = max(col_override.a, entity.hit_flash.a)
+	}
+
+	draw.draw_sprite(pos, sprite, pivot, flip_x, draw_offset, xform, anim_index, col, col_override, z_layer, flags, params, crop_top, crop_left, crop_bottom, crop_right)
+}
+
 //
 // ~ Gameplay Slop Waterline ~
 //

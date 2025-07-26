@@ -51,11 +51,22 @@ rect_size :: shape.rect_size
 Pivot :: utils.Pivot
 scale_from_pivot :: utils.scale_from_pivot // #cleanup, remove this
 
-// bald user stuff
+// bald user stuff (this is cringe and will be yeeted soon)
 ZLayer :: user.ZLayer
 Quad_Flags :: user.Quad_Flags
 Sprite_Name :: user.Sprite_Name
 get_frame_count :: user.get_frame_count
+get_sprite_offset :: user.get_sprite_offset
+get_sprite_center_mass :: proc(img: Sprite_Name) -> Vec2 {
+	size := draw.get_sprite_size(img)
+	
+	offset, pivot := get_sprite_offset(img)
+	
+	center := size * scale_from_pivot(pivot)
+	center -= offset
+	
+	return center
+}
 
 //
 // constant compile-tile flags for target specific logic
@@ -151,57 +162,9 @@ get_input_vector :: proc() -> Vec2 {
 }
 
 //
-// draw entity
-
-draw_entity_default :: proc(e: Entity) {
-	e := e // need this bc we can't take a reference from a procedure parameter directly
-
-	if e.sprite == nil {
-		return
-	}
-
-	xform := utils.xform_rotate(e.rotation)
-
-	draw_sprite_entity(&e, e.pos, e.sprite, xform=xform, anim_index=e.anim_index, draw_offset=e.draw_offset, flip_x=e.flip_x, pivot=e.draw_pivot)
-}
-
-// helper for drawing a sprite that's based on an entity.
-// useful for systems-based draw overrides, like having the concept of a hit_flash across all entities
-draw_sprite_entity :: proc(
-	entity: ^Entity,
-
-	pos: Vec2,
-	sprite: user.Sprite_Name,
-	pivot:=utils.Pivot.center_center,
-	flip_x:=false,
-	draw_offset:=Vec2{},
-	xform:=Matrix4(1),
-	anim_index:=0,
-	col:=color.WHITE,
-	col_override:Vec4={},
-	z_layer:user.ZLayer={},
-	flags:user.Quad_Flags={},
-	params:Vec4={},
-	crop_top:f32=0.0,
-	crop_left:f32=0.0,
-	crop_bottom:f32=0.0,
-	crop_right:f32=0.0,
-	z_layer_queue:=-1,
-) {
-
-	col_override := col_override
-
-	col_override = entity.scratch.col_override
-	if entity.hit_flash.a != 0 {
-		col_override.xyz = entity.hit_flash.xyz
-		col_override.a = max(col_override.a, entity.hit_flash.a)
-	}
-
-	draw.draw_sprite(pos, sprite, pivot, flip_x, draw_offset, xform, anim_index, col, col_override, z_layer, flags, params, crop_top, crop_left, crop_bottom, crop_right)
-}
-
-//
 // context structure
+
+// this is defined in the main.odin since it varies from game to game
 
 /*
 this is basically just Odin's context, but our own so it's easy to
@@ -213,12 +176,6 @@ doing a sim to predict the draw frame on some temporary game state.
 If the entire game.odin is written so that it's using data from here, it
 becomes trivial to swap in whatever is needed.
 */
-
-Core_Context :: struct {
-	gs: ^Game_State,
-	delta_t: f32,
-}
-ctx: Core_Context
 
 // useful for doing a push_ctx and setting values for a scope
 // and having it auto-pop to the original once the scope ends
@@ -331,4 +288,11 @@ mouse_pos_in_current_space :: proc() -> Vec2 {
 	mouse_world = cam * mouse_world
 	
 	return mouse_world.xy
+}
+
+//
+// SOUND
+
+emit_sound_from_entity :: proc(event_name: string, e: ^Entity) {
+	sound.play_continuously(event_name, fmt.tprint(e.handle.id), e.pos)
 }

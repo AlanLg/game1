@@ -1,16 +1,9 @@
 /*
 
-This is a program we run to build the game.
+Build script.
 
-Instead of writing this in .bat (or .sh or whatever) you can imagine how much
-easier it is to write a build script natively in Odin, especially as you scale
-things up and it becomes more complicated.
-
-Writing a script like this now becomes fun, because you're just using & getting better
-at the native language you use every day.
-
-The only downside right now is the build.exe gets left behind, we have no way of auto-deleting
-it on windows after execution yet.
+Note: doesn't make sense to abstract this away for re-use.
+There's too many project-specific settings here, so it's not worth the effort.
 
 */
 
@@ -26,8 +19,9 @@ import "core:log"
 import "core:reflect"
 import "core:time"
 
-import logger "bald:utils/logger"
-import utils "bald:utils"
+// we are assuming we're right next to the bald collection
+import logger "../bald/utils/logger"
+import utils "../bald/utils"
 
 EXE_NAME :: "game"
 
@@ -85,7 +79,7 @@ main :: proc() {
 	
 	// generate the shader
 	// docs: https://github.com/floooh/sokol-tools/blob/master/docs/sokol-shdc.md
-	utils.fire("sokol-shdc", "-i", "sauce/bald/draw/shader_core.glsl", "-o", "sauce/bald/draw/generated_shader.odin", "-l", "hlsl5:metal_macos", "-f", "sokol_odin")
+	utils.fire("sokol-shdc", "-i", "sauce/bald/draw/shader_core.glsl", "-o", "sauce/bald-user/generated_shader.odin", "-l", "hlsl5:metal_macos", "-f", "sokol_odin")
 
 	wd := os.get_current_directory()
 

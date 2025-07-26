@@ -38,6 +38,8 @@ I'll keep this like this for now, since I'm not sure if there's gonna be other t
 
 */
 
+import "bald:utils"
+
 //
 // DRAW
 
@@ -87,6 +89,15 @@ sprite_data: [Sprite_Name]Sprite_Data = #partial {
 
 Sprite_Data :: struct {
 	frame_count: int,
+	offset: Vec2,
+	pivot: utils.Pivot,
+}
+
+get_sprite_offset :: proc(img: Sprite_Name) -> (offset: Vec2, pivot: utils.Pivot) {
+	data := sprite_data[img]
+	offset = data.offset
+	pivot = data.pivot
+	return
 }
 
 // #cleanup todo, this is kinda yuckie living in the bald-user

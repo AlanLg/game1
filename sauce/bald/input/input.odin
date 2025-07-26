@@ -14,6 +14,8 @@ import sapp "bald:sokol/app"
 
 // points to the input state all high level calls will act upon
 state: ^Input
+// #todo, remove this and make everything operate via params passed down
+// that way we can have helpers elsewhere that use the game's context for this
 
 Input :: struct {
 	keys: [MAX_KEYCODES]bit_set[Input_Flag],

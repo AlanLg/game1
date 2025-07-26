@@ -27,17 +27,11 @@ import "core:strings"
 import "core:unicode"
 
 // these are just shorthand defs
-Vector2 :: [2]f32
-Vector3 :: [3]f32
-Vector4 :: [4]f32
-v2 :: Vector2
-v3 :: Vector3
-v4 :: Vector4
-Vec2 :: v2
-Vec3 :: v4
-Vec4 :: v4
+Vec2 :: [2]f32
+Vec3 :: [3]f32
+Vec4 :: [4]f32
 Matrix4 :: linalg.Matrix4f32;
-Vector2i :: [2]int
+Vec2i :: [2]int
 
 Pivot :: enum {
 	bottom_left,
@@ -58,27 +52,27 @@ Direction :: enum {
 	west,
 }
 
-scale_from_pivot :: proc(pivot: Pivot) -> Vector2 {
+scale_from_pivot :: proc(pivot: Pivot) -> Vec2 {
 	switch pivot {
-		case .bottom_left: return Vector2{0.0, 0.0}
-		case .bottom_center: return Vector2{0.5, 0.0}
-		case .bottom_right: return Vector2{1.0, 0.0}
-		case .center_left: return Vector2{0.0, 0.5}
-		case .center_center: return Vector2{0.5, 0.5}
-		case .center_right: return Vector2{1.0, 0.5}
-		case .top_center: return Vector2{0.5, 1.0}
-		case .top_left: return Vector2{0.0, 1.0}
-		case .top_right: return Vector2{1.0, 1.0}
+		case .bottom_left: return Vec2{0.0, 0.0}
+		case .bottom_center: return Vec2{0.5, 0.0}
+		case .bottom_right: return Vec2{1.0, 0.0}
+		case .center_left: return Vec2{0.0, 0.5}
+		case .center_center: return Vec2{0.5, 0.5}
+		case .center_right: return Vec2{1.0, 0.5}
+		case .top_center: return Vec2{0.5, 1.0}
+		case .top_left: return Vec2{0.0, 1.0}
+		case .top_right: return Vec2{1.0, 1.0}
 	}
 	return {};
 }
 
-vector_from_direction :: proc(dir: Direction) -> Vector2 {
-	return v2{ f32(cardinal_direction_offset(int(dir)).x), f32(cardinal_direction_offset(int(dir)).y) }
+vector_from_direction :: proc(dir: Direction) -> Vec2 {
+	return Vec2{ f32(cardinal_direction_offset(int(dir)).x), f32(cardinal_direction_offset(int(dir)).y) }
 }
 
 // takes in 0..<4 (0,1,2,3) will panic otherwise
-cardinal_direction_offset :: proc(i: int) -> Vector2i {
+cardinal_direction_offset :: proc(i: int) -> Vec2i {
 	switch i {
 		case 0: return {0, 1} // north
 		case 1: return {1, 0} // east
@@ -150,11 +144,11 @@ random_sign :: proc() -> f32 {
 	return rand.int_max(2) == 0 ? 1.0 : -1.0
 }
 
-random_dir :: proc() -> Vector2 {
-	return linalg.normalize(v2{ rand.float32_range(-1, 1), rand.float32_range(-1, 1) })
+random_dir :: proc() -> Vec2 {
+	return linalg.normalize(Vec2{ rand.float32_range(-1, 1), rand.float32_range(-1, 1) })
 }
 
-random_cardinal_dir_offset :: proc() -> Vector2i {
+random_cardinal_dir_offset :: proc() -> Vec2i {
 	return { rand_int(2)-1, rand_int(2)-1 }
 }
 
@@ -200,14 +194,14 @@ snake_case_to_pretty_name :: proc(snake: string) -> string {
 	return transmute(string)name;
 }
 
-xform_translate :: proc(pos: Vector2) -> Matrix4 {
-	return linalg.matrix4_translate(v3{pos.x, pos.y, 0})
+xform_translate :: proc(pos: Vec2) -> Matrix4 {
+	return linalg.matrix4_translate(Vec3{pos.x, pos.y, 0})
 }
 xform_rotate :: proc(angle: f32) -> Matrix4 {
-	return linalg.matrix4_rotate(math.to_radians(angle), v3{0,0,1})
+	return linalg.matrix4_rotate(math.to_radians(angle), Vec3{0,0,1})
 }
-xform_scale :: proc(scale: Vector2) -> Matrix4 {
-	return linalg.matrix4_scale(v3{scale.x, scale.y, 1});
+xform_scale :: proc(scale: Vec2) -> Matrix4 {
+	return linalg.matrix4_scale(Vec3{scale.x, scale.y, 1});
 }
 
 sine_breathe_alpha :: proc(p: $T) -> T where intrinsics.type_is_float(T) {
@@ -225,7 +219,7 @@ animate_to_target_f32 :: proc(value: ^f32, target: f32, delta_t: f32, rate:f32= 
 	return false;
 }
 
-animate_to_target_v2 :: proc(value: ^Vector2, target: Vector2, delta_t: f32, rate :f32= 15.0, good_enough:f32= 0.001)
+animate_to_target_v2 :: proc(value: ^Vec2, target: Vec2, delta_t: f32, rate :f32= 15.0, good_enough:f32= 0.001)
 {
 	animate_to_target_f32(&value.x, target.x, delta_t, rate, good_enough)
 	animate_to_target_f32(&value.y, target.y, delta_t, rate, good_enough)
@@ -253,8 +247,8 @@ float_alpha_f64 :: proc(x: f64, min: f64, max: f64, clamp_result: bool = true) -
 }
 
 hex_to_rgba :: u32_to_rgba;
-u32_to_rgba :: proc(v: u32) -> Vector4 {
-	return v4{
+u32_to_rgba :: proc(v: u32) -> Vec4 {
+	return Vec4{
 		cast(f32)((v & 0xff000000)>>24)/255.0,
 		cast(f32)((v & 0x00ff0000)>>16)/255.0,
 		cast(f32)((v & 0x0000ff00)>>8) /255.0,
@@ -270,17 +264,17 @@ ms_to_s :: proc(ms: f32) -> f32 {
 	return ms / 1000.0
 }
 
-rotate_vector :: proc(vec: v2, angle: f32) -> v2 {
+rotate_vector :: proc(vec: Vec2, angle: f32) -> Vec2 {
 	c := math.cos(math.to_radians(angle))
 	s := math.sin(math.to_radians(angle))
 
-	return v2{
+	return Vec2{
 		vec.x * c - vec.y * s,
 		vec.x * s + vec.y * c,
 	}
 }
 
-angle_from_vector :: proc(v: v2) -> f32 {
+angle_from_vector :: proc(v: Vec2) -> f32 {
 	return math.to_degrees(math.atan2(v.y, v.x))
 }
 

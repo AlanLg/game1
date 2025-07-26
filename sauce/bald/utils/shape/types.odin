@@ -1,9 +1,9 @@
 package shape
 
 // shorthand
-Vector2 :: [2]f32
-Vector3 :: [3]f32
-Vector4 :: [4]f32
+Vec2 :: [2]f32
+Vec3 :: [3]f32
+Vec4 :: [4]f32
 
 //
 // TYPES
@@ -15,7 +15,7 @@ Shape :: union {
 }
 
 Circle :: struct {
-	pos: Vector2,
+	pos: Vec2,
 	radius: f32,
 }
 
@@ -27,4 +27,4 @@ zw = top right (or max)
 
 It's very useful for making UI rects, also for collision.
 */
-Rect :: Vector4
+Rect :: Vec4

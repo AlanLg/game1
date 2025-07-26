@@ -1,7 +1,6 @@
 
 // syntax reference: https://github.com/floooh/sokol-tools/blob/master/docs/sokol-shdc.md
-@header #+private package
-@header package draw
+@header package core_user
 @header import sg "bald:sokol/gfx"
 
 @ctype vec4 Vec4

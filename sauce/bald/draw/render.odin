@@ -96,23 +96,23 @@ render_init :: proc() {
 	})
 	
 	// image stuff
-	render_state.bind.samplers[SMP_default_sampler] = sg.make_sampler({})
+	render_state.bind.samplers[user.SMP_default_sampler] = sg.make_sampler({})
 	
 	// setup pipeline
 	// :vertex layout
 	pipeline_desc : sg.Pipeline_Desc = {
-		shader = sg.make_shader(quad_shader_desc(sg.query_backend())),
+		shader = sg.make_shader(user.quad_shader_desc(sg.query_backend())),
 		index_type = .UINT16,
 		layout = {
 			attrs = {
-				ATTR_quad_position = { format = .FLOAT2 },
-				ATTR_quad_color0 = { format = .FLOAT4 },
-				ATTR_quad_uv0 = { format = .FLOAT2 },
-				ATTR_quad_local_uv0 = { format = .FLOAT2 },
-				ATTR_quad_size0 = { format = .FLOAT2 },
-				ATTR_quad_bytes0 = { format = .UBYTE4N },
-				ATTR_quad_color_override0 = { format = .FLOAT4 },
-				ATTR_quad_params0 = { format = .FLOAT4 },
+				user.ATTR_quad_position = { format = .FLOAT2 },
+				user.ATTR_quad_color0 = { format = .FLOAT4 },
+				user.ATTR_quad_uv0 = { format = .FLOAT2 },
+				user.ATTR_quad_local_uv0 = { format = .FLOAT2 },
+				user.ATTR_quad_size0 = { format = .FLOAT2 },
+				user.ATTR_quad_bytes0 = { format = .UBYTE4N },
+				user.ATTR_quad_color_override0 = { format = .FLOAT4 },
+				user.ATTR_quad_params0 = { format = .FLOAT4 },
 			},
 		}
 	}
@@ -158,8 +158,8 @@ core_render_frame_end :: proc() {
 		}
 	}
 	
-	render_state.bind.images[IMG_tex0] = atlas.sg_image
-	render_state.bind.images[IMG_font_tex] = font.sg_image
+	render_state.bind.images[user.IMG_tex0] = atlas.sg_image
+	render_state.bind.images[user.IMG_font_tex] = font.sg_image
 
 	{
 		sg.update_buffer(
@@ -169,7 +169,7 @@ core_render_frame_end :: proc() {
 		sg.begin_pass({ action = render_state.pass_action, swapchain = sglue.swapchain() })
 		sg.apply_pipeline(render_state.pip)
 		sg.apply_bindings(render_state.bind)
-		sg.apply_uniforms(UB_Shader_Data, {ptr=&draw_frame.shader_data, size=size_of(Shader_Data)})
+		sg.apply_uniforms(user.UB_Shader_Data, {ptr=&draw_frame.shader_data, size=size_of(user.Shader_Data)})
 		sg.draw(0, 6*total_quad_count, 1)
 		sg.end_pass()
 	}
@@ -195,7 +195,7 @@ Draw_Frame :: struct {
 		active_z_layer: user.ZLayer,
 		active_scissor: shape.Rect,
 		active_flags: user.Quad_Flags,
-		using shader_data: Shader_Data,
+		using shader_data: user.Shader_Data,
 	}
 
 }

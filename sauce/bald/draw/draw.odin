@@ -149,6 +149,7 @@ draw_rect :: proc(
 	draw_rect_xform(xform, size, sprite, uv, 0, 0, col, col_override, z_layer, flags, params, crop_top, crop_left, crop_bottom, crop_right, z_layer_queue)
 }
 
+// #cleanup - this should be a utility
 draw_sprite_in_rect :: proc(sprite: user.Sprite_Name, pos: Vec2, size: Vec2, xform := Matrix4(1), col := color.WHITE, col_override:= Vec4{0,0,0,0}, z_layer:=user.ZLayer.nil, flags:=user.Quad_Flags(0), pad_pct :f32= 0.1) {
 	img_size := get_sprite_size(sprite)
 	
