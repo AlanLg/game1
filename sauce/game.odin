@@ -108,9 +108,9 @@ Entity :: struct {
 	hit_flash: Vec4,
 	sprite: Sprite_Name,
 	anim_index: int,
-  next_frame_end_time: f64,
-  loop: bool,
-  frame_duration: f32,
+	next_frame_end_time: f64,
+	loop: bool,
+	frame_duration: f32,
 	
 	// this gets zeroed every frame. Useful for passing data to other systems.
 	scratch: struct {
@@ -120,19 +120,19 @@ Entity :: struct {
 
 Entity_Kind :: enum {
 	nil,
-	player,
-	thing1,
+	player_ship,
+	alien,
 }
 
-entity_setup :: proc(e: ^Entity, kind: Entity_Kind) {
+entity_setup :: proc(entity: ^Entity, kind: Entity_Kind) {
 	// entity defaults
-	e.draw_proc = draw_entity_default
-	e.draw_pivot = .bottom_center
+	entity.draw_proc = draw_entity_default
+	entity.draw_pivot = .bottom_center
 
 	switch kind {
 		case .nil:
-		case .player: setup_player(e)
-		case .thing1: setup_thing1(e)
+		case .player_ship: setup_player_ship(entity)
+		case .alien: setup_alien(entity)
 	}
 }
 
@@ -184,7 +184,7 @@ game_update :: proc() {
 
 	// setup world for first game tick
 	if ctx.gs.ticks == 0 {
-		player := entity_create(.player)
+		player := entity_create(.player_ship)
 		ctx.gs.player_handle = player.handle
 	}
 
@@ -192,12 +192,12 @@ game_update :: proc() {
 	
 	// big :update time
 	for handle in get_all_ents() {
-		e := entity_from_handle(handle)
+		entity := entity_from_handle(handle)
 
-		update_entity_animation(e)
+		update_entity_animation(entity)
 
-		if e.update_proc != nil {
-			e.update_proc(e)
+		if entity.update_proc != nil {
+			entity.update_proc(entity)
 		}
 	}
 
@@ -218,9 +218,9 @@ rebuild_scratch_helpers :: proc() {
 	// construct the list of all entities on the temp allocator
 	// that way it's easier to loop over later on
 	all_ents := make([dynamic]Entity_Handle, 0, len(ctx.gs.entities), allocator=context.temp_allocator)
-	for &e in ctx.gs.entities {
-		if !is_valid(e) do continue
-		append(&all_ents, e.handle)
+	for &entity in ctx.gs.entities {
+		if !is_valid(entity) do continue
+		append(&all_ents, entity.handle)
 	}
 	ctx.gs.scratch.all_entities = all_ents[:]
 }
@@ -250,8 +250,8 @@ game_draw :: proc() {
 		draw.draw_text({0, -50}, "sugon", pivot=.bottom_center, col={0,0,0,0.1})
 
 		for handle in get_all_ents() {
-			e := entity_from_handle(handle)
-			e.draw_proc(e^)
+			entity := entity_from_handle(handle)
+			entity.draw_proc(entity^)
 		}
 	}
 }
@@ -259,16 +259,16 @@ game_draw :: proc() {
 // note, this needs to be in the game layer because it varies from game to game.
 // Specifically, stuff like anim_index and whatnot aren't guarenteed to be named the same or actually even be on the base entity.
 // (in terrafactor, it's inside a sub state struct)
-draw_entity_default :: proc(e: Entity) {
-	e := e // need this bc we can't take a reference from a procedure parameter directly
+draw_entity_default :: proc(entity: Entity) {
+	entity := entity // need this bc we can't take a reference from a procedure parameter directly
 
-	if e.sprite == nil {
+	if entity.sprite == nil {
 		return
 	}
 
-	xform := utils.xform_rotate(e.rotation)
+	xform := utils.xform_rotate(entity.rotation)
 
-	draw_sprite_entity(&e, e.pos, e.sprite, xform=xform, anim_index=e.anim_index, draw_offset=e.draw_offset, flip_x=e.flip_x, pivot=e.draw_pivot)
+	draw_sprite_entity(&entity, entity.pos, entity.sprite, xform=xform, anim_index=entity.anim_index, draw_offset=entity.draw_offset, flip_x=entity.flip_x, pivot=entity.draw_pivot)
 }
 
 // helper for drawing a sprite that's based on an entity.
@@ -321,77 +321,77 @@ get_player :: proc() -> ^Entity {
 	return entity_from_handle(ctx.gs.player_handle)
 }
 
-setup_player :: proc(e: ^Entity) {
-	e.kind = .player
+setup_player_ship :: proc(entity: ^Entity) {
+	entity.kind = Entity_Kind.player_ship
 
 	// this offset is to take it from the bottom center of the aseprite document
 	// and center it at the feet
-	e.draw_offset = Vec2{0.5, 5}
-	e.draw_pivot = .bottom_center
+	entity.draw_offset = Vec2{0.5, 5}
+	entity.draw_pivot = Pivot.bottom_center
 
-	e.update_proc = proc(e: ^Entity) {
+	entity.update_proc = proc(entity: ^Entity) {
 
 		input_dir := get_input_vector()
-		e.pos += input_dir * 100.0 * ctx.delta_t
+		entity.pos += input_dir * 100.0 * ctx.delta_t
 
 		if input_dir.x != 0 {
-			e.last_known_x_dir = input_dir.x
+			entity.last_known_x_dir = input_dir.x
 		}
 
-		e.flip_x = e.last_known_x_dir < 0
+		entity.flip_x = entity.last_known_x_dir < 0
 
-		if input_dir == {} {
-			entity_set_animation(e, .player_idle, 0.3)
-		} else {
-			entity_set_animation(e, .player_run, 0.1)
-		}
+//		if input_dir == {} {
+//			entity_set_animation(entity, Sprite_Name.player_idle, 0.3)
+//		} else {
+//			entity_set_animation(entity, Sprite_Name.player_run, 0.1)
+//		}
 
-		e.scratch.col_override = Vec4{0,0,1,0.2}
+		entity.scratch.col_override = Vec4{0,0,1,0.2}
 	}
 
-	e.draw_proc = proc(e: Entity) {
-		draw.draw_sprite(e.pos, .shadow_medium, col={1,1,1,0.2})
-		draw_entity_default(e)
+	entity.draw_proc = proc(entity: Entity) {
+		draw.draw_sprite(entity.pos, .shadow_medium, col={1,1,1,0.2})
+		draw_entity_default(entity)
 	}
 }
 
-setup_thing1 :: proc(using e: ^Entity) {
-	kind = .thing1
+setup_alien :: proc(using e: ^Entity) {
+	kind = .alien
 }
 
-entity_set_animation :: proc(e: ^Entity, sprite: Sprite_Name, frame_duration: f32, looping:=true) {
-	if e.sprite != sprite {
-		e.sprite = sprite
-		e.loop = looping
-		e.frame_duration = frame_duration
-		e.anim_index = 0
-		e.next_frame_end_time = 0
+entity_set_animation :: proc(entity: ^Entity, sprite: Sprite_Name, frame_duration: f32, looping:=true) {
+	if entity.sprite != sprite {
+		entity.sprite = sprite
+		entity.loop = looping
+		entity.frame_duration = frame_duration
+		entity.anim_index = 0
+		entity.next_frame_end_time = 0
 	}
 }
-update_entity_animation :: proc(e: ^Entity) {
-	if e.frame_duration == 0 do return
+update_entity_animation :: proc(entity: ^Entity) {
+	if entity.frame_duration == 0 do return
 
-	frame_count := get_frame_count(e.sprite)
+	frame_count := get_frame_count(entity.sprite)
 
 	is_playing := true
-	if !e.loop {
-		is_playing = e.anim_index + 1 <= frame_count
+	if !entity.loop {
+		is_playing = entity.anim_index + 1 <= frame_count
 	}
 
 	if is_playing {
 	
-		if e.next_frame_end_time == 0 {
-			e.next_frame_end_time = now() + f64(e.frame_duration)
+		if entity.next_frame_end_time == 0 {
+			entity.next_frame_end_time = now() + f64(entity.frame_duration)
 		}
 	
-		if end_time_up(e.next_frame_end_time) {
-			e.anim_index += 1
-			e.next_frame_end_time = 0
-			//e.did_frame_advance = true
-			if e.anim_index >= frame_count {
+		if end_time_up(entity.next_frame_end_time) {
+			entity.anim_index += 1
+			entity.next_frame_end_time = 0
+			//entity.did_frame_advance = true
+			if entity.anim_index >= frame_count {
 
-				if e.loop {
-					e.anim_index = 0
+				if entity.loop {
+					entity.anim_index = 0
 				}
 
 			}
