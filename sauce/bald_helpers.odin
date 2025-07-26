@@ -152,8 +152,8 @@ get_input_vector :: proc() -> Vec2 {
 	input: Vec2
 	if is_action_down(.left) do input.x -= 1.0
 	if is_action_down(.right) do input.x += 1.0
-	if is_action_down(.down) do input.y -= 1.0
-	if is_action_down(.up) do input.y += 1.0
+//	if is_action_down(.down) do input.y -= 1.0
+//	if is_action_down(.up) do input.y += 1.0
 	if input == {} {
 		return {}
 	} else {

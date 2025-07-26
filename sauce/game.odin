@@ -244,10 +244,10 @@ game_draw :: proc() {
 	{
 		draw.push_coord_space(get_world_space())
 		
-		draw.draw_sprite({10, 10}, .player_still, col_override=Vec4{1,0,0,0.4})
-		draw.draw_sprite({-10, 10}, .player_still)
+//		draw.draw_sprite({10, 10}, .player_still, col_override=Vec4{1,0,0,0.4})
+//		draw.draw_sprite({-10, 10}, .player_still)
 
-		draw.draw_text({0, -50}, "sugon", pivot=.bottom_center, col={0,0,0,0.1})
+//		draw.draw_text({0, -50}, "sugon", pivot=.bottom_center, col={0,0,0,0.1})
 
 		for handle in get_all_ents() {
 			entity := entity_from_handle(handle)
@@ -323,10 +323,11 @@ get_player :: proc() -> ^Entity {
 
 setup_player_ship :: proc(entity: ^Entity) {
 	entity.kind = Entity_Kind.player_ship
+	entity.sprite = Sprite_Name.player_ship
 
 	// this offset is to take it from the bottom center of the aseprite document
 	// and center it at the feet
-	entity.draw_offset = Vec2{0.5, 5}
+	//	entity.draw_offset = Vec2{0.5, 5}
 	entity.draw_pivot = Pivot.bottom_center
 
 	entity.update_proc = proc(entity: ^Entity) {
@@ -338,25 +339,18 @@ setup_player_ship :: proc(entity: ^Entity) {
 			entity.last_known_x_dir = input_dir.x
 		}
 
-		entity.flip_x = entity.last_known_x_dir < 0
-
-//		if input_dir == {} {
-//			entity_set_animation(entity, Sprite_Name.player_idle, 0.3)
-//		} else {
-//			entity_set_animation(entity, Sprite_Name.player_run, 0.1)
-//		}
-
 		entity.scratch.col_override = Vec4{0,0,1,0.2}
 	}
 
 	entity.draw_proc = proc(entity: Entity) {
-		draw.draw_sprite(entity.pos, .shadow_medium, col={1,1,1,0.2})
+//		draw.draw_sprite(entity.pos, Sprite_Name.shadow_medium, col={1,1,1,0.2})
 		draw_entity_default(entity)
 	}
 }
 
-setup_alien :: proc(using e: ^Entity) {
-	kind = .alien
+setup_alien :: proc(entity: ^Entity) {
+	entity.kind = Entity_Kind.alien
+	entity.sprite = Sprite_Name.alien_1
 }
 
 entity_set_animation :: proc(entity: ^Entity, sprite: Sprite_Name, frame_duration: f32, looping:=true) {
