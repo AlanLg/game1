@@ -99,7 +99,6 @@ Entity :: struct {
 
 	// big sloppy entity state dump.
 	// add whatever you need in here.
-	pos: Vec2,
 	last_known_x_dir: f32,
 	flip_x: bool,
 	draw_offset: Vec2,
@@ -111,7 +110,15 @@ Entity :: struct {
 	next_frame_end_time: f64,
 	loop: bool,
 	frame_duration: f32,
-	
+
+	pos: Vec2,
+	vel: Vec2,
+	acc: Vec2,
+	friction: f32,
+	do_physics: bool,
+
+	time_alive: f32,
+
 	// this gets zeroed every frame. Useful for passing data to other systems.
 	scratch: struct {
 		col_override: Vec4,
@@ -122,6 +129,7 @@ Entity_Kind :: enum {
 	nil,
 	player_ship,
 	alien,
+	projectile,
 }
 
 entity_setup :: proc(entity: ^Entity, kind: Entity_Kind) {
@@ -133,6 +141,7 @@ entity_setup :: proc(entity: ^Entity, kind: Entity_Kind) {
 		case .nil:
 		case .player_ship: setup_player_ship(entity)
 		case .alien: setup_alien(entity)
+		case .projectile: setup_projectile(entity)
 	}
 }
 
@@ -324,6 +333,7 @@ get_player :: proc() -> ^Entity {
 setup_player_ship :: proc(entity: ^Entity) {
 	entity.kind = Entity_Kind.player_ship
 	entity.sprite = Sprite_Name.player_ship
+	entity.pos = Vec2{0,-100}
 
 	// this offset is to take it from the bottom center of the aseprite document
 	// and center it at the feet
@@ -331,7 +341,6 @@ setup_player_ship :: proc(entity: ^Entity) {
 	entity.draw_pivot = Pivot.bottom_center
 
 	entity.update_proc = proc(entity: ^Entity) {
-
 		input_dir := get_input_vector()
 		entity.pos += input_dir * 100.0 * ctx.delta_t
 
@@ -339,6 +348,11 @@ setup_player_ship :: proc(entity: ^Entity) {
 			entity.last_known_x_dir = input_dir.x
 		}
 
+		if is_action_pressed(.click) {
+			consume_action_pressed(.click)
+
+			projectile := entity_create(.projectile)
+		}
 		entity.scratch.col_override = Vec4{0,0,1,0.2}
 	}
 
@@ -351,6 +365,12 @@ setup_player_ship :: proc(entity: ^Entity) {
 setup_alien :: proc(entity: ^Entity) {
 	entity.kind = Entity_Kind.alien
 	entity.sprite = Sprite_Name.alien_1
+}
+
+setup_projectile :: proc(entity: ^Entity, player: ^Entity) {
+	entity.kind = Entity_Kind.projectile
+	entity.sprite = Sprite_Name.projectile
+	entity.pos = Vec2{player.pos.x, player.pos.y + 10}
 }
 
 entity_set_animation :: proc(entity: ^Entity, sprite: Sprite_Name, frame_duration: f32, looping:=true) {
