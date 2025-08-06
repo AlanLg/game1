@@ -209,7 +209,7 @@ game_update :: proc() {
 		sound.play("event:/schloop", pos=pos)
 	}
 
-	utils.animate_to_target_v2(&ctx.gs.cam_pos, get_player().pos, ctx.delta_t, rate=10)
+//	utils.animate_to_target_v2(&ctx.gs.cam_pos, get_player().pos, ctx.delta_t, rate=10)
 
 	// ... add whatever other systems you need here to make epic game
 }
